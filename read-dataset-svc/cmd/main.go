@@ -11,7 +11,7 @@ import (
 func main() {
 
 	svc := service.NewDatasetService()
-	loadDatasetEndpoint := endpoint.MakeLoadDatasetEndpoint(svc, "TB_F00_SICOVID.csv", 1000)
+	loadDatasetEndpoint := endpoint.MakeLoadDatasetEndpoint(svc)
 	handler.NewHttpHandler(loadDatasetEndpoint)
 	http.ListenAndServe(":8081", nil)
 
