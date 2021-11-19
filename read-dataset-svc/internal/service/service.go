@@ -90,7 +90,7 @@ func (datasetService) LoadDataset() ([][]interface{}, []string, error) {
 	// Lectura del dataset
 	DownloadFile("dataset.csv", "https://raw.githubusercontent.com/tf-concurrencia/C19-DetectBackend/feature/load-dataset/read-dataset-svc/TB_F00_SICOVID.csv")
 	f, _ := os.Open("dataset.csv")
-  N_ROWS := 1000
+	N_ROWS := 1000
 	//f, _ := os.Open(path) //"TB_F00_SICOVID.csv"
 	//f, _ := os.Open("TB_F00_SICOVID.csv") //"TB_F00_SICOVID.csv"
 
