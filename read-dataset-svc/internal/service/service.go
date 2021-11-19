@@ -88,7 +88,7 @@ func NewDatasetService() DatasetService {
 
 func (datasetService) LoadDataset(path string, n_rows int) ([][]interface{}, []string, error) {
 	// Lectura del dataset
-	DownloadFile("dataset.csv", "https://raw.githubusercontent.com/tf-concurrencia/C19-DetectBackend/main/read-dataset-svc/TB_F00_SICOVID.csv")
+	DownloadFile("dataset.csv", "https://raw.githubusercontent.com/tf-concurrencia/C19-DetectBackend/feature/load-dataset/read-dataset-svc/TB_F00_SICOVID.csv")
 	f, _ := os.Open("dataset.csv")
 	//f, _ := os.Open(path) //"TB_F00_SICOVID.csv"
 	defer f.Close()
