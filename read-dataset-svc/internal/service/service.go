@@ -35,7 +35,7 @@ func (wc WriteCounter) PrintProgress() {
 
 	// Return again and print current status of download
 	// We use the humanize package to print the bytes in a meaningful way (e.g. 10 MB)
-	fmt.Printf("\rDownloading... %s complete", humanize.Bytes(wc.Total))
+	fmt.Printf("\rDescargando... %s completado", humanize.Bytes(wc.Total))
 }
 
 func DownloadFile(filepath string, url string) error {
@@ -88,7 +88,14 @@ func NewDatasetService() DatasetService {
 
 func (datasetService) LoadDataset() ([][]interface{}, []string, error) {
 	// Lectura del dataset
-	DownloadFile("dataset.csv", "https://raw.githubusercontent.com/tf-concurrencia/C19-DetectBackend/feature/load-dataset/read-dataset-svc/TB_F00_SICOVID.csv")
+	if _, err := os.Stat("dataset.csv"); err == nil {
+		fmt.Println("Abriendo dataset obtenido de la web")
+
+	} else if errors.Is(err, os.ErrNotExist) {
+
+		DownloadFile("dataset.csv", "https://raw.githubusercontent.com/tf-concurrencia/C19-DetectBackend/feature/load-dataset/read-dataset-svc/TB_F00_SICOVID.csv")
+
+	}
 	f, _ := os.Open("dataset.csv")
 	N_ROWS := 1000
 	//f, _ := os.Open(path) //"TB_F00_SICOVID.csv"
