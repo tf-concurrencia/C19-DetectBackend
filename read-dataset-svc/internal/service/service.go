@@ -76,7 +76,7 @@ func DownloadFile(filepath string, url string) error {
 
 // DatasetService provides operations on strings.
 type DatasetService interface {
-	LoadDataset(path string, n_rows int) ([][]interface{}, []string, error)
+	LoadDataset() ([][]interface{}, []string, error)
 }
 
 // datasetService is a concrete implementation of DatasetService
@@ -86,11 +86,14 @@ func NewDatasetService() DatasetService {
 	return &datasetService{}
 }
 
-func (datasetService) LoadDataset(path string, n_rows int) ([][]interface{}, []string, error) {
+func (datasetService) LoadDataset() ([][]interface{}, []string, error) {
 	// Lectura del dataset
 	DownloadFile("dataset.csv", "https://raw.githubusercontent.com/tf-concurrencia/C19-DetectBackend/feature/load-dataset/read-dataset-svc/TB_F00_SICOVID.csv")
 	f, _ := os.Open("dataset.csv")
+  N_ROWS := 1000
 	//f, _ := os.Open(path) //"TB_F00_SICOVID.csv"
+	//f, _ := os.Open("TB_F00_SICOVID.csv") //"TB_F00_SICOVID.csv"
+
 	defer f.Close()
 	// Leer todo lo demás del dataset
 	content, _ := ioutil.ReadAll(f)
@@ -128,7 +131,7 @@ func (datasetService) LoadDataset(path string, n_rows int) ([][]interface{}, []s
 		// se alamacena en el arreglo target
 		targets = append(targets, target)
 		// si llegamos al limite de filas, romper el bucle
-		if i == n_rows {
+		if i == N_ROWS {
 			break
 		}
 	}

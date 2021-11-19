@@ -9,12 +9,13 @@ import (
 	"github.com/tf-concurrencia/read-dataset-svc/internal/service"
 )
 
-func MakeLoadDatasetEndpoint(svc service.DatasetService) endpoint.Endpoint {
+func MakePredictCovidEndpoint(svc service.PredictService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		inputs, targets, err := svc.LoadDataset()
+		req := request.(entity.PredictCovidRequest)
+		rpta, err := svc.PrediceCovid(req)
 		if err != nil {
-			return nil, errors.New("Error loading dataset")
+			return nil, errors.New("Error Predict")
 		}
-		return entity.LoadDatasetResponse{Inputs: inputs, Targets: targets}, nil
+		return entity.PredictResponse{Rpta: rpta}, nil
 	}
 }
