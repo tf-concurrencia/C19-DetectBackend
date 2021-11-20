@@ -44,7 +44,7 @@ func NewPredictService() PredictService {
 }
 
 func (s *predictService) PrediceCovid(predict entity.PredictCovidRequest) (string, error) {
-	resp, err := http.Get("http://localhost:8082/train-model")
+	resp, err := http.Get("http://host.docker.internal:8082/train-model")
 	if err != nil {
 		fmt.Println("No response from request")
 	}

@@ -50,7 +50,7 @@ func NewTrainModelService() TrainService {
 
 func (trainService) TrainModel(n_tree int) (interface{}, float64, float64, error) {
 	start := time.Now()
-	resp, err := http.Get("http://localhost:8081/load-dataset")
+	resp, err := http.Get("http://host.docker.internal:8081/load-dataset")
 	if err != nil {
 		panic(err.Error())
 	}
