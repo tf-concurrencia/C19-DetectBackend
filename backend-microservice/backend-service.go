@@ -1,6 +1,7 @@
 package main
 
 import (
+  "bytes"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -10,6 +11,9 @@ import (
 
 type Sintomas struct {
   Inputs []float64 `json:"inputs"`
+}
+type Rep struct {
+  resp int `json:"rpta"`
 }
 
 func postSintomas(resp http.ResponseWriter, req *http.Request) {
@@ -24,14 +28,25 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
 			}
 
 			var oSintomas Sintomas
-      err = json.Unmarshal(cuerpoMsg, &oSintomas)
+      json.Unmarshal(cuerpoMsg, &oSintomas)
+      json_data,err := json.Marshal(oSintomas)
+      if err != nil {
+        log.Println("Fail conver to json")
+      }
 
-      predict_req, err := http.Post("http://20.64.73.44:8083/predict-covid","Content-Type:application/json",req.Body)
+      predict_req, err := http.Post("http://20.64.73.44:8083/predict-covid","application/json",bytes.NewBuffer(json_data))
       if err != nil{
-        log.Println("Fail")
+        http.Error(resp, "Error con maquinas virtuales", http.StatusInternalServerError)
       }
       log.Println("Respuesta de las maquinas virtuales")
-      log.Println(predict_req)
+      log.Println(predict_req.Body)
+      cuerpoResputa, err := ioutil.ReadAll(predict_req.Body)
+      if err != nil {
+        http.Error(resp, "Error al leer la respuesta de la prediccion", http.StatusInternalServerError)
+      }
+      var oResp Rep
+      json.Unmarshal(cuerpoResputa, &oResp)
+      log.Println(oResp)
       //Respuesta
 			resp.Header().Set("Content-Type", "application-json")
 			io.WriteString(resp, `
