@@ -22,9 +22,16 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
 			if err != nil {
 				http.Error(resp, "Error interno al leer el body", http.StatusInternalServerError)
 			}
+
 			var oSintomas Sintomas
-      err = json.Unmarshal([]byte(cuerpoMsg), &oSintomas)
-      log.Panicln(err)
+      err = json.Unmarshal(cuerpoMsg, &oSintomas)
+
+      predict_req, err := http.Post("http://20.64.73.44:8083/predict-covid","Content-Type:application/json",req.Body)
+      if err != nil{
+        log.Println("Fail")
+      }
+      log.Println("Respuesta de las maquinas virtuales")
+      log.Println(predict_req)
       //Respuesta
 			resp.Header().Set("Content-Type", "application-json")
 			io.WriteString(resp, `
@@ -32,8 +39,6 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
                                 "respuesta":"Sintomas recibidos"
                         }
                         `)
-			log.Println(oSintomas)
-
 		} else {
 			http.Error(resp, "Contenido invalido", http.StatusBadRequest)
 		}
