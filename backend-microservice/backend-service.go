@@ -15,8 +15,8 @@ type RepPredict struct {
 	resp int `json:"rpta"`
 }
 type BackendResp struct{
-  input []float64
-  output int
+  input []float64 `json:"input"`
+  output int `json:"output"`
 }
 
 func postSintomas(resp http.ResponseWriter, req *http.Request) {
@@ -50,17 +50,20 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
 			var oResp RepPredict
 			json.Unmarshal(cuerpoResputa, &oResp)
 			log.Println(oResp)
+
       //Generando respuesta
       var oBackendResp BackendResp
       oBackendResp.input = oSintomas.Inputs
       oBackendResp.output = oResp.resp
-      json_resp, err := json.Marshal(oBackendResp)
+
+      //json_resp, err := json.Marshal(oBackendResp)
       if err != nil{
 				http.Error(resp, "Error al leer la respuesta de la prediccion", http.StatusInternalServerError)
       }
 			//Respuesta
 			resp.Header().Set("Content-Type", "application-json")
-      resp.Write(json_resp)
+      json.NewEncoder(resp).Encode(oBackendResp)
+
 			//io.WriteString(resp,`
                         //{
                           //"inputs": ,
