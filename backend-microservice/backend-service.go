@@ -1,26 +1,29 @@
 package main
 
 import (
-  "bytes"
+	"bytes"
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
 
 type Sintomas struct {
-  Inputs []float64 `json:"inputs"`
+	Inputs []float64 `json:"inputs"`
 }
-type Rep struct {
-  resp int `json:"rpta"`
+type RepPredict struct {
+	resp int `json:"rpta"`
+}
+type BackendResp struct{
+  input []float64
+  output int
 }
 
 func postSintomas(resp http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		if req.Header.Get("Content-Type") == "application/json" {
 			log.Println("Ingresando datos de sintomas")
-      log.Println(req.Body)
+			log.Println(req.Body)
 			cuerpoMsg, err := ioutil.ReadAll(req.Body)
 
 			if err != nil {
@@ -28,32 +31,42 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
 			}
 
 			var oSintomas Sintomas
-      json.Unmarshal(cuerpoMsg, &oSintomas)
-      json_data,err := json.Marshal(oSintomas)
-      if err != nil {
-        log.Println("Fail conver to json")
-      }
+			json.Unmarshal(cuerpoMsg, &oSintomas)
+			json_data, err := json.Marshal(oSintomas)
+			if err != nil {
+				log.Println("Fail conver to json")
+			}
 
-      predict_req, err := http.Post("http://20.64.73.44:8083/predict-covid","application/json",bytes.NewBuffer(json_data))
+			predict_req, err := http.Post("http://20.64.73.44:8083/predict-covid", "application/json", bytes.NewBuffer(json_data))
+			if err != nil {
+				http.Error(resp, "Error con maquinas virtuales", http.StatusInternalServerError)
+			}
+			log.Println("Respuesta de las maquinas virtuales")
+			log.Println(predict_req.Body)
+			cuerpoResputa, err := ioutil.ReadAll(predict_req.Body)
+			if err != nil {
+				http.Error(resp, "Error al leer la respuesta de la prediccion", http.StatusInternalServerError)
+			}
+			var oResp RepPredict
+			json.Unmarshal(cuerpoResputa, &oResp)
+			log.Println(oResp)
+      //Generando respuesta
+      var oBackendResp BackendResp
+      oBackendResp.input = oSintomas.Inputs
+      oBackendResp.output = oResp.resp
+      json_resp, err := json.Marshal(oBackendResp)
       if err != nil{
-        http.Error(resp, "Error con maquinas virtuales", http.StatusInternalServerError)
+				http.Error(resp, "Error al leer la respuesta de la prediccion", http.StatusInternalServerError)
       }
-      log.Println("Respuesta de las maquinas virtuales")
-      log.Println(predict_req.Body)
-      cuerpoResputa, err := ioutil.ReadAll(predict_req.Body)
-      if err != nil {
-        http.Error(resp, "Error al leer la respuesta de la prediccion", http.StatusInternalServerError)
-      }
-      var oResp Rep
-      json.Unmarshal(cuerpoResputa, &oResp)
-      log.Println(oResp)
-      //Respuesta
+			//Respuesta
 			resp.Header().Set("Content-Type", "application-json")
-			io.WriteString(resp, `
-                        {
-                                "respuesta":"Sintomas recibidos"
-                        }
-                        `)
+      resp.Write(json_resp)
+			//io.WriteString(resp,`
+                        //{
+                          //"inputs": ,
+                          //"output":
+                        //}
+                        //`)
 		} else {
 			http.Error(resp, "Contenido invalido", http.StatusBadRequest)
 		}
@@ -62,8 +75,8 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func testRequest(resp http.ResponseWriter, req *http.Request){
-  log.Println("Entre al test")
+func testRequest(resp http.ResponseWriter, req *http.Request) {
+	log.Println("Entre al test")
 }
 func manejadorSolicitudes() {
 	mux := http.NewServeMux()
