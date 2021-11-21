@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+  "io"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -12,11 +13,11 @@ type Sintomas struct {
 	Inputs []float64 `json:"inputs"`
 }
 type RepPredict struct {
-	resp int `json:"rpta"`
+	Resp string `json:"rpta"`
 }
 type BackendResp struct{
-  input []float64 `json:"input"`
-  output int `json:"output"`
+  Input []float64 `json:"input"`
+  Output string `json:"output"`
 }
 
 func postSintomas(resp http.ResponseWriter, req *http.Request) {
@@ -53,23 +54,13 @@ func postSintomas(resp http.ResponseWriter, req *http.Request) {
 
       //Generando respuesta
       var oBackendResp BackendResp
-      oBackendResp.input = oSintomas.Inputs
-      oBackendResp.output = oResp.resp
-
-      //json_resp, err := json.Marshal(oBackendResp)
-      if err != nil{
-				http.Error(resp, "Error al leer la respuesta de la prediccion", http.StatusInternalServerError)
-      }
-			//Respuesta
+      oBackendResp.Input = oSintomas.Inputs
+      oBackendResp.Output = oResp.Resp
+      log.Println(oBackendResp)
+      json_resp, _ := json.MarshalIndent(oBackendResp,""," ")
+      log.Println(string(json_resp))
 			resp.Header().Set("Content-Type", "application-json")
-      json.NewEncoder(resp).Encode(oBackendResp)
-
-			//io.WriteString(resp,`
-                        //{
-                          //"inputs": ,
-                          //"output":
-                        //}
-                        //`)
+      io.WriteString(resp,string(json_resp))
 		} else {
 			http.Error(resp, "Contenido invalido", http.StatusBadRequest)
 		}
